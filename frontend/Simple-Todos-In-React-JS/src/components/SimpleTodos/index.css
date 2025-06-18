@@ -1,0 +1,131 @@
+body {
+  background-color: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.container {
+  background-color: #fff;
+  margin: 48px auto;
+  width: 720px;
+  padding: 48px 48px 32px 48px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(30, 41, 59, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+h1 {
+  color: #222;
+  text-align: left;
+  margin-bottom: 32px;
+  font-weight: 600;
+  font-size: 2.1rem;
+  letter-spacing: 0.5px;
+}
+
+form {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+  gap: 12px;
+}
+
+form input[type="text"] {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 1.08rem;
+  outline: none;
+  background: #f9fafb;
+  color: #222;
+  transition: border 0.2s;
+}
+
+form input[type="text"]:focus {
+  border: 1.5px solid #6b7280;
+  background: #fff;
+}
+
+form button {
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 22px;
+  font-size: 1.08rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 1px 2px rgba(30,41,59,0.04);
+}
+
+form button:hover {
+  background: #222;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.todo-item:last-child {
+  border-bottom: none;
+}
+
+.todo-item input[type="checkbox"] {
+  margin-right: 16px;
+  width: 20px;
+  height: 20px;
+  accent-color: #444;
+}
+
+.todo-item span {
+  flex: 1;
+  font-size: 1.12rem;
+  margin-right: 12px;
+  color: #222;
+  word-break: break-word;
+}
+
+.todo-item button {
+  margin-left: 8px;
+  background: #fff;
+  color: #444;
+  border: 1.5px solid #bbb;
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  box-shadow: 0 1px 2px rgba(30,41,59,0.03);
+}
+
+.todo-item button:hover {
+  background: #444;
+  color: #fff;
+  border: 1.5px solid #444;
+}
+
+.todo-item input[type="text"] {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-right: 10px;
+  background: #f9fafb;
+  color: #222;
+}

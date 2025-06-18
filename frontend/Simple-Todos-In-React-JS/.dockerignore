@@ -1,0 +1,12 @@
+node_modules
+build
+.dockerignore
+Dockerfile
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+.eslintcache
+*.md
+.git
+.gitignore
+.vscode

@@ -1,0 +1,18 @@
+replicaCount: 1
+
+image:
+  repository: simple-todo-frontend
+  tag: latest
+  pullPolicy: Never
+
+service:
+  type: LoadBalancer
+  port: 80
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

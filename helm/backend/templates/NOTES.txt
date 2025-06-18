@@ -1,0 +1,11 @@
+1. Get the backend service URL by running:
+
+   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "backend.fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+   echo http://$SERVICE_IP:{{ .Values.service.port }}
+
+   (If using ClusterIP, port-forward with:
+   kubectl port-forward svc/{{ include "backend.fullname" . }} 5000:{{ .Values.service.port }} )
+
+2. To check backend pod status:
+
+   kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ include "backend.name" . }},release={{ .Release.Name }}"
