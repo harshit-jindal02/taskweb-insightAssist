@@ -1,0 +1,77 @@
+name: Build & Deploy TaskWeb to EC2/Minikube
+
+# Trigger on pushes to main (adjust as needed)
+on:
+  push:
+    branches: [ main ]
+
+env:
+  # Docker Hub creds (set these in your repo Secrets)
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN:    ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  build-and-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: backend/Flask-ToDo-List
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_USERNAME }}/taskweb-backend:latest
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: frontend/Simple-Todos-In-React-JS
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_USERNAME }}/taskweb-frontend:latest
+
+  deploy:
+    name: SSH to EC2 & Deploy
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Deploy on EC2
+        env:
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          DOCKERHUB_USERNAME: ${{ env.DOCKERHUB_USERNAME }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+            set -eux
+
+            # Load Minikube's Docker daemon
+            eval $(minikube docker-env)
+
+            # Pull the newly built images into Minikube
+            docker pull $DOCKERHUB_USERNAME/taskweb-backend:latest
+            docker pull $DOCKERHUB_USERNAME/taskweb-frontend:latest
+
+            # Apply your multi-doc manifest (must be committed at k8s/taskweb-deploy.yaml)
+            kubectl apply -f k8s/taskweb-deploy.yaml
+
+            # Restart so the OTel webhook injects sidecars/init-containers
+            kubectl rollout restart deployment backend frontend -n traceassist
+          EOF
