@@ -50,19 +50,19 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: node-app-deployment
+  name: frontend
 spec:
   selector:
     matchLabels:
-      app: node-app
+      app: frontend
   template:
     metadata:
       labels:
-        app: node-app
+        app: frontend
     spec:
       containers:
-      - name: node-app
-        image: frontend
+      - name: frontend
+        image: taskweb/frontend:latest
         imagePullPolicy: Never
         ports:
         - containerPort: 3000
@@ -72,11 +72,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: node-app-service
+  name: frontend-svc
 spec:
   type: ClusterIP
   selector:
-    app: node-app
+    app: frontend
   ports:
     - protocol: TCP
       port: 3000
