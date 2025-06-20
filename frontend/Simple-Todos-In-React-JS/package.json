@@ -7,7 +7,8 @@
     "npm": ">=6"
   },
   "dependencies": {
-    "@opentelemetry/exporter-trace-otlp-http": "0.202.0",
+    "@opentelemetry/otlp-exporter-base": "0.43.0",
+    "@opentelemetry/exporter-trace-otlp-http": "0.43.0",
     "@opentelemetry/instrumentation-fetch": "0.202.0",
     "@opentelemetry/instrumentation-xml-http-request": "0.202.0",
     "@opentelemetry/sdk-trace-base": "2.0.1",
