@@ -7,6 +7,11 @@
     "npm": ">=6"
   },
   "dependencies": {
+    "@opentelemetry/exporter-trace-otlp-http": "0.202.0",
+    "@opentelemetry/instrumentation-fetch": "0.202.0",
+    "@opentelemetry/instrumentation-xml-http-request": "0.202.0",
+    "@opentelemetry/sdk-trace-base": "2.0.1",
+    "@opentelemetry/sdk-trace-web": "2.0.1",
     "@testing-library/jest-dom": "5.11.9",
     "@testing-library/react": "11.2.5",
     "@testing-library/user-event": "12.6.2",
