@@ -10,8 +10,8 @@ const provider = new WebTracerProvider()
 
 // 2. Configure the OTLP exporter to your SigNoz endpoint & headers
 const exporter = new OTLPTraceExporter({
-  url: 'https://ingest.in.signoz.cloud/v1/traces', // adjust path if needed
-  headers: {authorization: 'Bearer <YOUR_INGEST_KEY>'},
+  url: 'https://ingest.in.signoz.cloud:4317', // adjust path if needed
+  headers: {authorization: 'Bearer e9bfcba0-a5a1-4d45-b2d5-38d332625ac8'},
 })
 
 // 3. Add a batch span processor
