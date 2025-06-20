@@ -29,45 +29,45 @@ jobs:
           ssh -o StrictHostKeyChecking=no \
               ${{ secrets.ec2_user }}@${{ secrets.ec2_host }} << 'EOF'
             set -eux
-            # # 1️⃣ Install & enable dependencies
-            # sudo apt-get update
-            # sudo apt-get install -y curl apt-transport-https conntrack git
-            # sudo apt-get install -y docker.io
-            # sudo systemctl enable --now docker
-            # # kubectl
-            # curl -LO https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
-            # chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-            # # Minikube
-            # curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-            # chmod +x minikube && sudo mv minikube /usr/local/bin/
-            # # Helm
-            # curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-            # # 2️⃣ Clone & run TraceAssist
-            # if [ -d "$HOME/traceAssist" ]; then
-            #   cd "$HOME/traceAssist"
-            #   git pull
-            # else
-            #   git clone https://github.com/harshit-jindal02/traceAssist.git "$HOME/traceAssist"
-            #   cd "$HOME/traceAssist"
-            # fi
-            # chmod +x run.sh
-            # sudo usermod -aG docker $USER
-            # newgrp docker << EOI
-            # ./run.sh
-            # EOI
-            # # 3️⃣ Clone TaskWeb app
-            # if [ -d "$HOME/taskweb-insightAssist" ]; then
-            #   cd "$HOME/taskweb-insightAssist"
-            #   git pull
-            # else
-            #   git clone https://github.com/harshit-jindal02/taskweb-insightAssist.git "$HOME/taskweb-insightAssist"
-            #   cd "$HOME/taskweb-insightAssist"
-            # fi
-            # # 4️⃣ Build images inside Minikube’s Docker daemon
-            # eval \$(minikube docker-env)
-            # docker build -t taskweb/backend:latest backend/Flask-ToDo-List
-            # docker build -t taskweb/frontend:latest frontend/Simple-Todos-In-React-JS
-            # # 5️⃣ Apply manifest & restart to trigger OTel injection
+            # 1️⃣ Install & enable dependencies
+            sudo apt-get update
+            sudo apt-get install -y curl apt-transport-https conntrack git
+            sudo apt-get install -y docker.io
+            sudo systemctl enable --now docker
+            # kubectl
+            curl -LO https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
+            chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+            # Minikube
+            curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+            chmod +x minikube && sudo mv minikube /usr/local/bin/
+            # Helm
+            curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+            # 2️⃣ Clone & run TraceAssist
+            if [ -d "$HOME/traceAssist" ]; then
+              cd "$HOME/traceAssist"
+              git pull
+            else
+              git clone https://github.com/harshit-jindal02/traceAssist.git "$HOME/traceAssist"
+              cd "$HOME/traceAssist"
+            fi
+            chmod +x run.sh
+            sudo usermod -aG docker $USER
+            newgrp docker << EOI
+            ./run.sh
+            EOI
+            # 3️⃣ Clone TaskWeb app
+            if [ -d "$HOME/taskweb-insightAssist" ]; then
+              cd "$HOME/taskweb-insightAssist"
+              git pull
+            else
+              git clone https://github.com/harshit-jindal02/taskweb-insightAssist.git "$HOME/taskweb-insightAssist"
+              cd "$HOME/taskweb-insightAssist"
+            fi
+            # 4️⃣ Build images inside Minikube’s Docker daemon
+            eval \$(minikube docker-env)
+            docker build -t taskweb/backend:latest backend/Flask-ToDo-List
+            docker build -t taskweb/frontend:latest frontend/Simple-Todos-In-React-JS
+            # 5️⃣ Apply manifest & restart to trigger OTel injection
             kubectl apply -f ~/traceAssist/k8s/taskweb-deploy.yaml
             kubectl rollout restart deployment backend frontend -n traceassist
             # 6️⃣ Port-forward in background so you can curl
