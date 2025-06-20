@@ -2,19 +2,17 @@ name: Full Deploy to EC2/Minikube
 
 on:
   workflow_call:
-    inputs:
+    # no inputs section any more
+    secrets:
       ec2_user:
-        description: “user to SSH into EC2”
+        description: "SSH user for EC2"
         required: true
-        type: string
       ec2_host:
-        description: “EC2 host (IP or DNS)”
+        description: "EC2 host (IP or DNS)"
         required: true
-        type: string
       ec2_ssh_key:
-        description: “SSH private key (base64 or multiline)”
+        description: "SSH private key for EC2"
         required: true
-        type: string
 
 jobs:
   deploy:
@@ -26,11 +24,9 @@ jobs:
           ssh-private-key: ${{ secrets.ec2_ssh_key }}
 
       - name: SSH & Deploy to Minikube
-        env:
-          EC2_USER: ${{ inputs.ec2_user }}
-          EC2_HOST: ${{ inputs.ec2_host }}
         run: |
-          ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no \
+              ${{ secrets.ec2_user }}@${{ secrets.ec2_host }} << 'EOF'
             set -eux
             # 1️⃣ Install & enable dependencies
             sudo apt-get update
