@@ -51,7 +51,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  namespace: traceassist
+  labels:
+    app: frontend
+  annotations:
+    deployment.kubernetes.io/revision: "1"
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -59,25 +65,28 @@ spec:
     metadata:
       labels:
         app: frontend
+      annotations:
+        instrumentation.opentelemetry.io/inject: "true"
+        instrumentation.opentelemetry.io/inject-nodejs: "true"
     spec:
+      serviceAccountName: traceassist-sa
       containers:
-      - name: frontend
-        image: taskweb/frontend:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 3000
-
+        - name: frontend
+          image: taskweb/frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
 ---
 # 4️⃣ Frontend Service
 apiVersion: v1
 kind: Service
 metadata:
   name: frontend-svc
+  namespace: traceassist
 spec:
   type: ClusterIP
   selector:
     app: frontend
   ports:
-    - protocol: TCP
-      port: 3000
-      targetPort: 3000
+    - port: 80
+      targetPort: 80
