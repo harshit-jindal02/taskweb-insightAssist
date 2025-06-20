@@ -68,7 +68,7 @@ jobs:
             docker build -t taskweb/backend:latest backend/Flask-ToDo-List
             docker build -t taskweb/frontend:latest frontend/Simple-Todos-In-React-JS
             # 5️⃣ Apply manifest & restart to trigger OTel injection
-            kubectl apply -f k8s/taskweb-deploy.yaml
+            kubectl apply -f traceAssist/k8s/taskweb-deploy.yaml
             kubectl rollout restart deployment backend frontend -n traceassist
             # 6️⃣ Port-forward in background so you can curl
             sleep 25
