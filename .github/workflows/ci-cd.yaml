@@ -54,7 +54,7 @@ jobs:
   deploy-to-traceassist:
     name: Deploy to TraceAssist
     needs: [lint-frontend]
-    uses: ./.github/workflows/traceassist-deploy.yml
+    uses: ./.github/workflows/deploy.yml
     vars:
       ec2_user:    ${{ secrets.EC2_USER }}
       ec2_host:    ${{ secrets.EC2_HOST }}
