@@ -52,17 +52,14 @@ jobs:
           npx eslint src
   
   deploy-to-traceassist:
-    name: Deploy to TraceAssist
-    needs: [lint-frontend]
-    uses: ./.github/workflows/deploy.yml
-    vars:
-      ec2_user:    ${{ secrets.EC2_USER }}
-      ec2_host:    ${{ secrets.EC2_HOST }}
-      ec2_ssh_key: ${{ secrets.EC2_SSH_KEY }}
+    name: Deploy to TraceAssist on EC2/Minikube
+    needs: [ lint-frontend ]       # only run after your frontend lint step
+    uses: ./.github/workflows/traceassist-deploy.yml
     with:
-      ec2_user:    ${{ vars.ec2_user }}
-      ec2_host:    ${{ vars.ec2_host }}
-      ec2_ssh_key: ${{ vars.ec2_ssh_key }}
+      ec2_user: ${{ secrets.EC2_USER }}
+      ec2_host: ${{ secrets.EC2_HOST }}
+    secrets:
+      ec2_ssh_key: ${{ secrets.EC2_SSH_KEY }}
 
   build-and-push-backend:
     needs: [lint-backend]

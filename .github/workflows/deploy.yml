@@ -23,7 +23,7 @@ jobs:
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ inputs.ec2_ssh_key }}
+          ssh-private-key: ${{ secrets.ec2_ssh_key }}
 
       - name: SSH & Deploy to Minikube
         env:
