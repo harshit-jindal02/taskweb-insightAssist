@@ -54,9 +54,9 @@ jobs:
   deploy-to-traceassist:
     name: Deploy to TraceAssist on EC2/Minikube
     needs: [lint-frontend]
-    uses: ./.github/workflows/traceassist-deploy.yml
+    uses: ./.github/workflows/deploy.yml
 
-    # ① Populate these from your repo Secrets
+    # Populate these from your repo Secrets
     env:
       EC2_USER:    ${{ secrets.EC2_USER }}
       EC2_HOST:    ${{ secrets.EC2_HOST }}
