@@ -1,9 +1,7 @@
 name: Full Deploy + Smoke-test to EC2/Minikube
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -14,7 +12,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      - name: SSH to EC2 and full deploy + test
+      - name: SSH to EC2, Bootstrap & Deploy TaskWeb
         env:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -22,66 +20,59 @@ jobs:
           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
             set -eux
 
-            # 1️⃣ Install & enable dependencies
+            # 1️⃣ Install essentials
             sudo apt-get update
             sudo apt-get install -y curl apt-transport-https conntrack git docker.io
             sudo systemctl enable --now docker
 
-            # kubectl
+            # 2️⃣ Install kubectl
             curl -LO https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
             chmod +x kubectl && sudo mv kubectl /usr/local/bin/
 
-            # Minikube
+            # 3️⃣ Install Minikube & Helm
             curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
             chmod +x minikube && sudo mv minikube /usr/local/bin/
-
-            # Helm
             curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
-            # 2️⃣ Bootstrap TraceAssist as ubuntu in docker group
-            if [ -d "\$HOME/traceAssist" ]; then
-              cd "\$HOME/traceAssist" && git pull
+            # 4️⃣ Bootstrap TraceAssist (as ubuntu in docker group)
+            if [ -d ~/traceAssist ]; then
+              cd ~/traceAssist && git pull
             else
-              git clone https://github.com/harshit-jindal02/traceAssist.git "\$HOME/traceAssist"
-              cd "\$HOME/traceAssist"
+              git clone https://github.com/harshit-jindal02/traceAssist.git ~/traceAssist
+              cd ~/traceAssist
             fi
             chmod +x run.sh
-
-            # Add ubuntu to docker group so minikube can use the docker driver
             sudo usermod -aG docker $USER
-
-            # Re-evaluate group membership for this shell and run run.sh as ubuntu
             newgrp docker -c "./run.sh"
 
-            # 3️⃣ Clone / update TaskWeb
-            if [ -d "\$HOME/taskweb-insightAssist" ]; then
-              cd "\$HOME/taskweb-insightAssist" && git pull
+            # 5️⃣ Clone or update TaskWeb code
+            if [ -d ~/taskweb-insightAssist ]; then
+              cd ~/taskweb-insightAssist && git pull
             else
-              git clone https://github.com/harshit-jindal02/taskweb-insightAssist.git "\$HOME/taskweb-insightAssist"
-              cd "\$HOME/taskweb-insightAssist"
+              git clone https://github.com/harshit-jindal02/taskweb-insightAssist.git ~/taskweb-insightAssist
+              cd ~/taskweb-insightAssist
             fi
 
-            # 4️⃣ Build images in Minikube’s Docker daemon
-            eval \$(minikube docker-env)
+            # 6️⃣ Build images inside Minikube’s Docker daemon
+            eval $(minikube docker-env)
             docker build -t taskweb/backend:latest backend/Flask-ToDo-List
             docker build -t taskweb/frontend:latest frontend/Simple-Todos-In-React-JS
 
-            # 5️⃣ Deploy & restart to trigger OTel injection
+            # 7️⃣ Deploy & restart to trigger OTel injection
             kubectl apply -f k8s/taskweb-deploy.yaml
             kubectl rollout restart deployment backend frontend -n traceassist
 
-            # 6️⃣ Port-forward on EC2 host, listening externally
-            nohup kubectl port-forward --address 0.0.0.0 svc/backend-svc -n traceassist 5000:5000 >/dev/null 2>&1 &
-            nohup kubectl port-forward --address 0.0.0.0 svc/frontend-svc -n traceassist 8080:80 >/dev/null 2>&1 &
+            # 8️⃣ Port-forward on EC2 (listening 0.0.0.0)
+            nohup kubectl port-forward svc/backend-svc -n traceassist 5000:5000 --address 0.0.0.0 >/dev/null 2>&1 &
+            nohup kubectl port-forward svc/frontend-svc -n traceassist 8080:80 --address 0.0.0.0 >/dev/null 2>&1 &
 
+            # 9️⃣ Give it a sec, then smoke-test
             sleep 5
-
-            # 7️⃣ Smoke-test via curl (against localhost)
-            echo "🔍 Testing backend: http://localhost:5000/api/todos"
+            echo "🔍 Backend test → http://localhost:5000/api/todos"
             curl -v http://localhost:5000/api/todos
 
-            echo "🔍 Testing frontend: http://localhost:8080/"
+            echo "🔍 Frontend test → http://localhost:8080/"
             curl -v http://localhost:8080/
 
-            echo "✅ Smoke-test complete. Check SigNoz for traces & metrics."
+            echo "✅ All done — check SigNoz for traces & metrics!"
           EOF
