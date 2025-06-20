@@ -64,5 +64,7 @@ jobs:
             sleep 7
             nohup kubectl port-forward svc/backend-svc -n traceassist 5000:5000 >/dev/null 2>&1 &
             nohup kubectl port-forward svc/frontend-svc -n traceassist 8080:80 >/dev/null 2>&1 &
+            curl http://localhost:5000/api/todos
+            curl http://localhost:8080
             echo "🔗 Port-forwards established: backend→localhost:5000, frontend→localhost:8080"
           EOF
