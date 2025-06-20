@@ -1,7 +1,20 @@
 name: Full Deploy to EC2/Minikube
 
 on:
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ec2_user:
+        description: “user to SSH into EC2”
+        required: true
+        type: string
+      ec2_host:
+        description: “EC2 host (IP or DNS)”
+        required: true
+        type: string
+      ec2_ssh_key:
+        description: “SSH private key (base64 or multiline)”
+        required: true
+        type: string
 
 jobs:
   deploy:
@@ -10,12 +23,12 @@ jobs:
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+          ssh-private-key: ${{ inputs.ec2_ssh_key }}
 
-      - name: SSH to EC2 and install, bootstrap, build & deploy
+      - name: SSH & Deploy to Minikube
         env:
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ inputs.ec2_user }}
+          EC2_HOST: ${{ inputs.ec2_host }}
         run: |
           ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
             set -eux
