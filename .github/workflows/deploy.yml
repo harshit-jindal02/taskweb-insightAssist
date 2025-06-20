@@ -1,7 +1,9 @@
 name: Full Deploy + Smoke-test to EC2/Minikube
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -22,8 +24,7 @@ jobs:
 
             # 1️⃣ Install & enable dependencies
             sudo apt-get update
-            sudo apt-get install -y curl apt-transport-https conntrack git
-            sudo apt-get install -y docker.io
+            sudo apt-get install -y curl apt-transport-https conntrack git docker.io
             sudo systemctl enable --now docker
 
             # kubectl
@@ -38,30 +39,27 @@ jobs:
             curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
             # 2️⃣ Bootstrap TraceAssist
-            if [ -d "$HOME/traceAssist" ]; then
-              cd "$HOME/traceAssist" && git pull
+            if [ -d "\$HOME/traceAssist" ]; then
+              cd "\$HOME/traceAssist" && git pull
             else
-              git clone https://github.com/harshit-jindal02/traceAssist.git "$HOME/traceAssist"
-              cd "$HOME/traceAssist"
+              git clone https://github.com/harshit-jindal02/traceAssist.git "\$HOME/traceAssist"
+              cd "\$HOME/traceAssist"
             fi
             chmod +x run.sh
-            sudo usermod -aG docker $USER
-            newgrp docker << EOI
-            ./run.sh
-            EOI
+            sudo ./run.sh
 
             # 3️⃣ Clone / update TaskWeb
-            if [ -d "$HOME/taskweb-insightAssist" ]; then
-              cd "$HOME/taskweb-insightAssist" && git pull
+            if [ -d "\$HOME/taskweb-insightAssist" ]; then
+              cd "\$HOME/taskweb-insightAssist" && git pull
             else
-              git clone https://github.com/harshit-jindal02/taskweb-insightAssist.git "$HOME/taskweb-insightAssist"
-              cd "$HOME/taskweb-insightAssist"
+              git clone https://github.com/harshit-jindal02/taskweb-insightAssist.git "\$HOME/taskweb-insightAssist"
+              cd "\$HOME/taskweb-insightAssist"
             fi
 
-            # 4️⃣ Build images in Minikube
+            # 4️⃣ Build images in Minikube’s Docker daemon
             eval \$(minikube docker-env)
-            docker build -t taskweb/backend:latest backend/Flask-ToDo-List
-            docker build -t taskweb/frontend:latest frontend/Simple-Todos-In-React-JS
+            sudo docker build -t taskweb/backend:latest backend/Flask-ToDo-List
+            sudo docker build -t taskweb/frontend:latest frontend/Simple-Todos-In-React-JS
 
             # 5️⃣ Deploy & restart to trigger OTel injection
             kubectl apply -f k8s/taskweb-deploy.yaml
@@ -75,14 +73,14 @@ jobs:
               --address 0.0.0.0 svc/frontend-svc -n traceassist 8080:80 \
               >/dev/null 2>&1 &
 
-            # give port-forwards a moment to come up
+            # give port-forwards a moment
             sleep 5
 
             # 7️⃣ Smoke-test via curl
-            echo "🔍 Testing backend: http://$EC2_HOST:5000/api/todos"
+            echo "🔍 Testing backend: http://localhost:5000/api/todos"
             curl -v http://localhost:5000/api/todos
 
-            echo "🔍 Testing frontend: http://$EC2_HOST:8080"
+            echo "🔍 Testing frontend: http://localhost:8080/"
             curl -v http://localhost:8080/
 
             echo "✅ Smoke-test complete. Check SigNoz for traces & metrics."
