@@ -53,11 +53,20 @@ jobs:
   
   deploy-to-traceassist:
     name: Deploy to TraceAssist on EC2/Minikube
-    needs: [ lint-frontend ]       # only run after your frontend lint step
-    uses: ./.github/workflows/deploy.yml
+    needs: [lint-frontend]
+    uses: ./.github/workflows/traceassist-deploy.yml
+
+    # ① Populate these from your repo Secrets
+    env:
+      EC2_USER:    ${{ secrets.EC2_USER }}
+      EC2_HOST:    ${{ secrets.EC2_HOST }}
+
+    # ② Pass them in via with: (using env, not secrets)
     with:
-      ec2_user: ${{ secrets.EC2_USER }}
-      ec2_host: ${{ secrets.EC2_HOST }}
+      ec2_user:    ${{ env.EC2_USER }}
+      ec2_host:    ${{ env.EC2_HOST }}
+
+    # ③ Still supply the SSH key as a secret
     secrets:
       ec2_ssh_key: ${{ secrets.EC2_SSH_KEY }}
 
