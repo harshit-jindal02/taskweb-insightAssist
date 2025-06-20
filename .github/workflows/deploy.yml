@@ -61,7 +61,7 @@ jobs:
             kubectl apply -f k8s/taskweb-deploy.yaml
             kubectl rollout restart deployment backend frontend -n traceassist
             # 6️⃣ Port-forward in background so you can curl
-            sleep 15
+            sleep 25
             nohup kubectl port-forward svc/backend-svc -n traceassist 5000:5000 >/dev/null 2>&1 &
             nohup kubectl port-forward svc/frontend-svc -n traceassist 8080:80 >/dev/null 2>&1 &
             sleep 5
