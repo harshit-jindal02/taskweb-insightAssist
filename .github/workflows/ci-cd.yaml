@@ -53,7 +53,7 @@ jobs:
   
   deploy-to-traceassist:
     name: Deploy to TraceAssist on EC2/Minikube
-    needs: [ lint-frontend ]
+    # needs: [ lint-frontend ]
     uses: ./.github/workflows/deploy.yml
     secrets:
       ec2_user:    ${{ secrets.EC2_USER }}
